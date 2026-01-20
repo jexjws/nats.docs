@@ -32,4 +32,4 @@ JetStream 会发布一系列告警信息，这些信息可以告知操作人员�
 
 ## 仪表板
 
-[NATS Surveyor](https://github.com/nats-io/nats-surveyor) 系统最初支持将 JetStream 指标传递到 Prometheus，未来还将添加更多仪表板功能，直至最终发布。
+查看 [NATS Surveyor 仪表板](https://github.com/nats-io/nats-surveyor/tree/main/docker-compose/grafana/provisioning/dashboards)。
