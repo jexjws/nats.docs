@@ -8,11 +8,6 @@ node_modules
 .DS_Store
 
 
-_book/
-_docs/
-_examples/
-_tools/
-_layouts/
 
 Makefile
 building_the_book.md
