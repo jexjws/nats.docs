@@ -12,6 +12,7 @@ _book/
 _docs/
 _examples/
 _tools/
+_layouts/
 docs/
 
 Makefile

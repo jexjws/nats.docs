@@ -1,8 +1,7 @@
-
-_book/
-_docs/
-_examples/
-_tools/
+\_book/
+\_docs/
+\_examples/
+\_tools/
 docs/
 
 Makefile
