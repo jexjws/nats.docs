@@ -13,7 +13,6 @@ _docs/
 _examples/
 _tools/
 _layouts/
-docs/
 
 Makefile
 building_the_book.md
