@@ -32,4 +32,4 @@ JetStream 会发布一系列告警信息，这些信息可以告知操作人员�
 
 ## 仪表板
 
-查看 [NATS Surveyor 仪表板](https://github.com/nats-io/nats-surveyor/tree/main/docker-compose/grafana/provisioning/dashboards)。
+看看 [NATS Surveyor Dashboards](https://github.com/nats-io/nats-surveyor/tree/main/docker-compose/grafana/provisioning/dashboards)。

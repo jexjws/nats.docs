@@ -5,7 +5,7 @@
 在 Unix 系统上，NATS 服务器会响应以下信号。  
 您可以使用标准 Unix `kill` 命令发送这些信号，或使用 `nats-server --signal` 命令以方便使用。
 
-| nats-server 命令 | Unix 信号 | 描述                                                    |
+| nats-server command | Unix Signal | Description                       |
 | :------------------ | :---------- | :------------------------------------------------------------- |
 | `--signal ldm`      | `SIGUSR2`   | 优雅关闭（逐步驱逐客户端）\([跛脚鸭模式](lame_duck_mode.md)\) |
 | `--signal quit`     | `SIGINT`    | 优雅地停止服务器                                    |
