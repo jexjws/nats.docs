@@ -55,7 +55,7 @@ export default defineConfig({
   plugins: [
     pluginGitBookAssets(),
     pluginSitemap({
-      siteUrl: 'https://nats-docs-cn.voyage200.top/',
+      siteUrl: 'https://nats-docs-cn.voyage200.top/', // 据说pages.dev有的时候会被劫持并返回假证书，浏览器会阻止连接，所以此处使用自己的域名而不是pages.dev
     }),
     ga({
       id: 'G-X2FCFH31SQ',
