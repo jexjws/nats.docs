@@ -13,7 +13,7 @@ export default defineConfig({
     dark: '/nats-horizontal-color.png',
   },
   llms: true,
-  lang: 'zh-cn',
+  lang: 'zh',
   locales: [
     {
       lang: 'en',
@@ -22,7 +22,7 @@ export default defineConfig({
       description: 'Administrative, developer and conceptual documentation for the NATS messaging system.',
     },
     {
-      lang: 'zh-cn',
+      lang: 'zh',
       label: '简体中文',
       title: 'NATS',
       description: 'NATS 消息系统的运维、开发和概念文档。',
