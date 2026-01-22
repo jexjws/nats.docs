@@ -5,17 +5,17 @@
     "activeMatch": "/introduce/"
   },
   {
-    "text": "NATS 概念",
+    "text": "概念",
     "link": "/nats-concepts/what-is-nats/readme",
     "activeMatch": "/nats-concepts/"
   },
   {
-    "text": "使用 NATS",
+    "text": "使用",
     "link": "/using-nats/nats-tools/readme",
     "activeMatch": "/using-nats/"
   },
   {
-    "text": "NATS server 运维",
+    "text": "运维",
     "link": "/running-a-nats-service/introduction",
     "activeMatch": "/running-a-nats-service/"
   },

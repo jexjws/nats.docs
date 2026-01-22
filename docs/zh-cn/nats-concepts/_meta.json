@@ -17,7 +17,7 @@
   {
     "type": "dir",
     "name": "core-nats",
-    "label": "核心 NATS"
+    "label": "Core NATS"
   },
   {
     "type": "dir",
@@ -47,11 +47,11 @@
   {
     "type": "file",
     "name": "acks",
-    "label": "消息确认"
+    "label": "ACK 机制"
   },
   {
     "type": "file",
     "name": "adaptive_edge_deployment",
-    "label": "NATS 自适应部署架构"
+    "label": "自适应的 NATS 部署架构"
   }
 ]
