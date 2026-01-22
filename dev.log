@@ -1,0 +1,45 @@
+
+> nats.docs@1.0.0 dev
+> rspress dev
+
+🔥 Rspress v2.0.0-rc.6
+
+  ➜  Local:    http://localhost:3000/
+  ➜  Network:  http://192.168.1.5:3000/
+  ➜  Network:  http://198.18.0.1:3000/
+
+start   build started...
+warn    [i18n] The following i18n keys are missing for some languages and have fallen back to 'en':
+      {
+  "languagesText": "...",
+  "themeText": "...",
+  "versionsText": "...",
+  "menuTitle": "...",
+  "outlineTitle": "...",
+  "scrollToTopText": "...",
+  "lastUpdatedText": "...",
+  "prevPageText": "...",
+  "nextPageText": "...",
+  "sourceCodeText": "...",
+  "searchPlaceholderText": "...",
+  "searchPanelCancelText": "...",
+  "searchNoResultsText": "...",
+  "searchSuggestedQueryText": "...",
+  "overview.filterNameText": "...",
+  "overview.filterPlaceholderText": "...",
+  "overview.filterNoResultText": "...",
+  "openInText": "...",
+  "copyMarkdownText": "...",
+  "copyMarkdownLinkText": "...",
+  "editLinkText": "...",
+  "codeButtonGroupCopyButtonText": "...",
+  "notFoundText": "...",
+  "takeMeHomeText": "..."
+}
+      You can provide translations via i18n.json file or i18nSource config in rspress.config.ts
+error   Build error: 
+× [rsbuild:html] Failed to read the favicon file at /home/voyage200/Projects/jexjws/nats.docs/docs/public/favicon.ico.
+
+error   build failed in 0.84 s
+start   building virtual modules
+ready   built in 0.25 s

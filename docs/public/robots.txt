@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /en/
+
+Sitemap: https://temp-nats-docs-cn.pages.dev/sitemap.xml

@@ -1,0 +1,57 @@
+[
+  {
+    "type": "file",
+    "name": "overview/compare-nats",
+    "label": "比较 NATS"
+  },
+  {
+    "type": "dir",
+    "name": "what-is-nats",
+    "label": "什么是 NATS"
+  },
+  {
+    "type": "file",
+    "name": "subjects",
+    "label": "基于主题的消息传递"
+  },
+  {
+    "type": "dir",
+    "name": "core-nats",
+    "label": "核心 NATS"
+  },
+  {
+    "type": "dir",
+    "name": "jetstream",
+    "label": "JetStream"
+  },
+  {
+    "type": "file",
+    "name": "subject_mapping",
+    "label": "主题映射与分区"
+  },
+  {
+    "type": "file",
+    "name": "service_infrastructure",
+    "label": "NATS 服务基础设施"
+  },
+  {
+    "type": "file",
+    "name": "security",
+    "label": "安全"
+  },
+  {
+    "type": "file",
+    "name": "connectivity",
+    "label": "连接"
+  },
+  {
+    "type": "file",
+    "name": "acks",
+    "label": "消息确认"
+  },
+  {
+    "type": "file",
+    "name": "adaptive_edge_deployment",
+    "label": "NATS 自适应部署架构"
+  }
+]

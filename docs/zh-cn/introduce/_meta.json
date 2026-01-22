@@ -1,0 +1,17 @@
+[
+  {
+    "type": "file",
+    "name": "overview",
+    "label": "概述"
+  },
+  {
+    "type": "file",
+    "name": "feature_comparison",
+    "label": "功能对比"
+  },
+  {
+    "type": "file",
+    "name": "reference-protocols",
+    "label": "协议参考"
+  }
+]

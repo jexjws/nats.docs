@@ -1,0 +1,57 @@
+[
+  {
+    "type": "file",
+    "name": "overview/compare-nats",
+    "label": "Compare NATS"
+  },
+  {
+    "type": "dir",
+    "name": "what-is-nats",
+    "label": "What is NATS"
+  },
+  {
+    "type": "file",
+    "name": "subjects",
+    "label": "Subject-Based Messaging"
+  },
+  {
+    "type": "dir",
+    "name": "core-nats",
+    "label": "Core NATS"
+  },
+  {
+    "type": "dir",
+    "name": "jetstream",
+    "label": "JetStream"
+  },
+  {
+    "type": "file",
+    "name": "subject_mapping",
+    "label": "Subject Mapping and Partitioning"
+  },
+  {
+    "type": "file",
+    "name": "service_infrastructure",
+    "label": "NATS Service Infrastructure"
+  },
+  {
+    "type": "file",
+    "name": "security",
+    "label": "Security"
+  },
+  {
+    "type": "file",
+    "name": "connectivity",
+    "label": "Connectivity"
+  },
+  {
+    "type": "file",
+    "name": "acks",
+    "label": "Acknowledgments"
+  },
+  {
+    "type": "file",
+    "name": "adaptive_edge_deployment",
+    "label": "NATS Adaptive Deployment Architectures"
+  }
+]

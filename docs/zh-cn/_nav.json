@@ -1,0 +1,47 @@
+[
+  {
+    "text": "介绍",
+    "link": "/introduce/overview",
+    "activeMatch": "/introduce/"
+  },
+  {
+    "text": "NATS 概念",
+    "link": "/nats-concepts/what-is-nats/readme",
+    "activeMatch": "/nats-concepts/"
+  },
+  {
+    "text": "使用 NATS",
+    "link": "/using-nats/nats-tools/readme",
+    "activeMatch": "/using-nats/"
+  },
+  {
+    "text": "NATS server 运维",
+    "link": "/running-a-nats-service/introduction",
+    "activeMatch": "/running-a-nats-service/"
+  },
+  {
+    "text": "参考",
+    "link": "/reference/faq",
+    "activeMatch": "/reference/"
+  },
+  {
+    "text": "发行注记",
+    "link": "/release_notes/whats_new",
+    "activeMatch": "/release_notes/"
+  },
+  {
+    "text": "NEX",
+    "link": "/nex/readme",
+    "activeMatch": "/nex/"
+  },
+  {
+    "text": "NGS",
+    "link": "/ngs/readme",
+    "activeMatch": "/ngs/"
+  },
+  {
+    "text": "示例",
+    "link": "/howto-examples/overview",
+    "activeMatch": "/howto-examples/"
+  }
+]

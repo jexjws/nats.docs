@@ -1,0 +1,17 @@
+[
+  {
+    "type": "file",
+    "name": "overview",
+    "label": "Overview"
+  },
+  {
+    "type": "file",
+    "name": "feature_comparison",
+    "label": "Feature Comparison"
+  },
+  {
+    "type": "file",
+    "name": "reference-protocols",
+    "label": "Protocol Reference"
+  }
+]
