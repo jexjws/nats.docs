@@ -83,7 +83,7 @@ export default defineConfig({
   plugins: [
     pluginGitBookAssets(),
     pluginSitemap({
-      siteUrl: 'https://temp-nats-docs-cn.pages.dev',
+      siteUrl: 'https://cn-nats-docs.pages.dev',
     }),
     ga({
       id: 'G-X2FCFH31SQ',
