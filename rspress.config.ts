@@ -18,13 +18,13 @@ export default defineConfig({
     {
       lang: 'en',
       label: 'English',
-      title: 'NATS',
+      title: 'NATS Documentation',
       description: 'Administrative, developer and conceptual documentation for the NATS messaging system.',
     },
     {
       lang: 'zh',
       label: '简体中文',
-      title: 'NATS',
+      title: 'NATS 说明书',
       description: 'NATS 消息系统的运维、开发和概念文档。',
     },
   ],
