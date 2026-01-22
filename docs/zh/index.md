@@ -5,6 +5,9 @@
 > 官方的在 https://docs.nats.io ，预计在 [此PR](https://github.com/nats-io/nats.docs/pull/873) 被合并后关闭本网站。
 >
 > 本网站由 PR 发起者 jexjws 搭建，有事请联系：hello_cmd@outlook.com
+>
+> 2026.1.22：据说pages.dev有时候会被劫持并返回假证书，致使浏览器阻止连接，所以我使用了自己的域名托管这个站点而非 nats-docs-cn.pages.dev
+
 
 ## ~~官方~~ [NATS](https://nats.io/) 文档
 
