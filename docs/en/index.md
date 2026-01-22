@@ -2,7 +2,7 @@
 
 > ⚠️ **THIS IS UNOFFICIAL DOCS SITE**
 >
-> The official NATS documentation is available at https://docs.nats.io
+> The official documentation is available at https://docs.nats.io
 >
 > The English section of this website exists to facilitate Chinese users viewing the original English version. It will be closed after [this pull request](https://github.com/nats-io/nats.docs/pull/873) is merged.
 >

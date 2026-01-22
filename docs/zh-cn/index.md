@@ -2,7 +2,7 @@
 
 > ⚠️ **这不是官方 NATS 文档站**
 >
-> 官方的 NATS 文档在 https://docs.nats.io ，预计在 [此PR](https://github.com/nats-io/nats.docs/pull/873) 被合并后关闭本网站。
+> 官方的在 https://docs.nats.io ，预计在 [此PR](https://github.com/nats-io/nats.docs/pull/873) 被合并后关闭本网站。
 >
 > 本网站由 PR 发起者 jexjws 搭建，有事请联系：hello_cmd@outlook.com
 
