@@ -55,7 +55,7 @@ export default defineConfig({
   plugins: [
     pluginGitBookAssets(),
     pluginSitemap({
-      siteUrl: 'https://nats-docs-cn.pages.dev',
+      siteUrl: 'https://nats-docs-cn.voyage200.top/',
     }),
     ga({
       id: 'G-X2FCFH31SQ',

@@ -1,4 +1,4 @@
 User-agent: *
 Disallow: /en/
 
-Sitemap: https://nats-docs-cn.pages.dev/sitemap.xml
+Sitemap: https://nats-docs-cn.voyage200.top/sitemap.xml
