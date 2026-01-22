@@ -15,7 +15,7 @@
     "activeMatch": "/using-nats/"
   },
   {
-    "text": "运维",
+    "text": "运维 NATS server",
     "link": "/running-a-nats-service/introduction",
     "activeMatch": "/running-a-nats-service/"
   },
