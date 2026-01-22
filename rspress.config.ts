@@ -33,15 +33,17 @@ export default defineConfig({
       {
         icon: 'github',
         mode: 'link',
-        content: 'https://github.com/jexjws/nats.docs',
+        content: 'https://github.com/jexjws/nats.docs/tree/rspress',
       },
     ],
     footer: {
       message: 'UNOFFICIAL DOCS SITE - Copyright © 2025 NATS Maintainers',
     },
     editLink: {
-      docRepoBaseUrl: 'https://github.com/jexjws/nats.docs/edit/master',
+      docRepoBaseUrl: 'https://github.com/jexjws/nats.docs/edit/rspress/docs',
     },
+    enableContentAnimation: true,
+    enableAppearanceAnimation: true,
   },
   markdown: {
     remarkPlugins: [remarkRewriteLinks],
