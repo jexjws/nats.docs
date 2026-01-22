@@ -42,6 +42,7 @@ export default defineConfig({
     editLink: {
       docRepoBaseUrl: 'https://github.com/jexjws/nats.docs/edit/rspress/docs',
     },
+    lastUpdated: true,
     enableContentAnimation: true,
     enableAppearanceAnimation: true,
   },
