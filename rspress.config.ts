@@ -42,7 +42,7 @@ export default defineConfig({
     editLink: {
       docRepoBaseUrl: 'https://github.com/jexjws/nats.docs/edit/rspress/docs',
     },
-    lastUpdated: true,
+    lastUpdated: false,
     enableContentAnimation: true,
     enableAppearanceAnimation: true,
   },
@@ -84,7 +84,7 @@ export default defineConfig({
   plugins: [
     pluginGitBookAssets(),
     pluginSitemap({
-      siteUrl: 'https://cn-nats-docs.pages.dev',
+      siteUrl: 'https://nats-docs-cn.pages.dev',
     }),
     ga({
       id: 'G-X2FCFH31SQ',
