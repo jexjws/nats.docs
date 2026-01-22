@@ -14,3 +14,4 @@ building_the_book.md
 .gitignore
 .bookignore
 doc_build
+dev.log
