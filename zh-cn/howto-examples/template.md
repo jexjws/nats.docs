@@ -1,25 +1,26 @@
-# Template
-## Pre-conditions
-Expected knowledge and tools to run this example. Only `nats-server` and `nats` are implied.
+# 模板
 
-E.g. "Uses scp for configuring authentication"
+## 前置条件
+运行该示例所需的基础知识与工具。默认只需要 `nats-server` 和 `nats`。
 
-## Goal
-Briefly describe what the overarching use case is and which configurations and features are being demonstrated.
+例如：“使用 scp 配置认证”。
 
-## Concepts and Patterns
-Briefly explain architectural ideas and design patterns used.
+## 目标
+简要说明这个示例要解决的整体用例，以及将演示哪些配置与功能。
 
-## Step by step example
-May be broken into sections
+## 概念与模式
+简要解释所采用的架构思路与设计模式。
+
+## 分步示例
+可按小节拆分。
 
 
-# Do's and Dont's
-* Avoid linking to external information in the step-by-step guide. 
-* Explain or refer to a concept front up.
-* In the step-by-step section, explain the parameters and options used, nothing else.
-* Provide every single command and configuration.
-* Do not introduce a new tool in the step-by-step guide
-* Concrete parameters - there should be no need to infer anything
-* Use concrete names for entities - e.g. from payment processing or retail order management
+# 注意事项（Do's and Don'ts）
+* 在分步指南中避免链接到外部信息。
+* 涉及概念时请先解释或先给出引用入口。
+* 在分步部分只解释所用参数与选项，不要扩展到其他内容。
+* 列出每一条命令与每一份配置（不要省略）。
+* 不要在分步指南中引入新工具。
+* 参数要具体明确——读者不应需要“自行推断”。
+* 实体命名要具体——例如使用支付处理或零售订单管理等场景中的具体名称。
 

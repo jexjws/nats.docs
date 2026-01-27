@@ -1,34 +1,40 @@
-# JetStream Model Deep Dive
+# JetStream 模型深入解析
 
-## Stream Limits, Retention, and Policy
+## Stream 限制、保留与策略
 
-Streams store data on disk, but we cannot store all data forever, so we need ways to control their size automatically.
+Stream 会把数据存储在磁盘上，但我们不可能永远保存所有数据，因此需要一些机制来自动控制 Stream 的规模。
 
-There are 3 features that come into play when Streams decide how long they store data.
+当 Stream 决定“消息要保留多久”时，主要会涉及 3 个方面。
 
-The `Retention Policy` describes based on what criteria a set will evict messages from its storage:
+`Retention Policy`（保留策略）描述了系统依据什么标准从存储中逐出（evict）消息：
 
-| Retention Policy  | Description                                                                                                                                                                                                                                                                                                                                                                |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `LimitsPolicy`    | Limits are set for how many messages, how big the storage and how old messages may be.                                                                                                                                                                                                                                                                                     |
-| `WorkQueuePolicy` | Messages are kept until they are consumed: meaning delivered ( by _the_ consumer filtering on the message's subject (in this mode of operation you can not have any overlapping consumers defined on the Stream - each subject captured by the stream can only have one consumer at a time)) to a subscribing application and explicitly acknowledged by that application. |
-| `InterestPolicy`  | Messages are kept as long as there are Consumers on the stream (matching the message's subject if they are filtered consumers) for which the message has not yet been ACKed. Once all currently defined consumers have received explicit acknowledgement from a subscribing application for the message it is then removed from the stream.                                |
+| Retention Policy  | 说明 |
+| ----------------- | ---- |
+| `LimitsPolicy`    | 通过限制“消息条数 / 总存储大小 / 消息最大年龄”来决定保留范围。 |
+| `WorkQueuePolicy` | 消息会一直保留到被消费为止：也就是消息被投递给订阅应用（由某个 Consumer 根据 subject 过滤接收）。在这种模式下，同一条 Stream 覆盖到的每个 subject 同一时刻只能有一个 Consumer（不允许重叠 Consumer）。应用必须显式 ACK 该消息。 |
+| `InterestPolicy`  | 只要 Stream 上还存在 Consumer（若 Consumer 做了过滤，则需匹配消息 subject）且该消息尚未被 ACK，就会继续保留。只有当当前定义的所有 Consumer 都已收到订阅应用对该消息的显式 ACK 后，消息才会从 Stream 中删除。 |
 
-In all Retention Policies the basic limits apply as upper bounds, these are `MaxMsgs` for how many messages are kept in total, `MaxBytes` for how big the set can be in total and `MaxAge` for what is the oldest message that will be kept. These are the only limits in play with `LimitsPolicy` retention.
+在所有保留策略下，基础的上限限制都会生效：`MaxMsgs`（最多保留多少条消息）、`MaxBytes`（最多占用多少总字节数）以及 `MaxAge`（最多保留多老的消息）。在 `LimitsPolicy` 下，只有这些上限限制参与决策。
 
-One can then define additional ways a message may be removed from the Stream earlier than these limits. In `WorkQueuePolicy` the messages will be removed as soon as _the_ Consumer received an Acknowledgement. In `InterestPolicy` messages will be removed as soon as _all_ Consumers of the stream for that subject have received an Acknowledgement for the message.
+你还可以定义一些“让消息早于上限被删除”的条件：
 
-In both `WorkQueuePolicy` and `InterestPolicy` the age, size and count limits will still apply as upper bounds.
+- 在 `WorkQueuePolicy` 中，只要该 Consumer 收到消息的 ACK，消息就会被移除。
+- 在 `InterestPolicy` 中，只要该 subject 上的所有 Consumer 都对该消息做了 ACK，消息就会被移除。
 
-A final control is the Maximum Size any single message may have. NATS have it's own limit for maximum size (1 MiB by default), but you can say a Stream will only accept messages up to 1024 bytes using `MaxMsgSize`.
+在 `WorkQueuePolicy` 与 `InterestPolicy` 中，年龄、大小与数量这三类上限限制仍然作为“硬上限”存在。
 
-The `Discard Policy` sets how messages are discarded when limits set by `LimitsPolicy` are reached. The `DiscardOld` option removes old messages making space for new, while `DiscardNew` refuses any new messages.
+最后还有一个重要控制项：单条消息的最大尺寸。NATS 本身对最大消息尺寸有默认限制（默认 1 MiB），但你也可以通过 `MaxMsgSize` 指定某个 Stream 只接受不超过 1024 字节的消息。
 
-The `WorkQueuePolicy` mode is a specialized mode where a message, once consumed and acknowledged, is removed from the Stream.
+`Discard Policy` 用于规定当 `LimitsPolicy` 的限制被触发时，如何丢弃消息：
 
-## Message Deduplication
+- `DiscardOld`：丢弃旧消息，为新消息腾出空间
+- `DiscardNew`：拒绝新消息
 
-JetStream support idempotent message writes by ignoring duplicate messages as indicated by the `Nats-Msg-Id` header.
+`WorkQueuePolicy` 是一种特殊模式：消息一旦被消费并 ACK，就会从 Stream 中删除。
+
+## 消息去重（Message Deduplication）
+
+JetStream 通过 `Nats-Msg-Id` header 来识别重复消息：当检测到重复时会忽略写入，从而支持幂等写入。
 
 ```shell
 nats req -H Nats-Msg-Id:1 ORDERS.new hello1
@@ -37,13 +43,13 @@ nats req -H Nats-Msg-Id:1 ORDERS.new hello3
 nats req -H Nats-Msg-Id:1 ORDERS.new hello4
 ```
 
-Here we set a `Nats-Msg-Id:1` header which tells JetStream to ensure we do not have duplicates of this message - we only consult the message ID not the body.
+这里我们设置了 `Nats-Msg-Id:1`，告诉 JetStream：请确保这条消息不会重复写入。去重只会参考消息 ID，而不会比较 body。
 
 ```shell
 nats stream info ORDERS
 ```
 
-and in the output you can see that the duplicate publications were detected and only one message (the first one) is actually stored in the stream
+从输出可以看到：系统检测到了重复发布，Stream 实际只存储了一条消息（第一条）。
 
 ```
 ....
@@ -53,21 +59,21 @@ State:
                Bytes: 67 B
 ```
 
-The default window to track duplicates in is 2 minutes, this can be set on the command line using `--dupe-window` when creating a stream, though we would caution against large windows.
+默认的去重时间窗口是 2 分钟。创建 Stream 时可以用 `--dupe-window` 调整该窗口，但不建议设置得过大。
 
-## Acknowledgement Models
+## 确认（Acknowledgement）模型
 
-Streams support acknowledging receiving a message, if you send a `Request()` to a subject covered by the configuration of the Stream the service will reply to you once it stored the message. If you just publish, it will not. A Stream can be set to disable Acknowledgements by setting `NoAck` to `true` in it's configuration.
+Stream 支持对“已接收并已存储消息”进行确认：如果你对 Stream 配置覆盖的 subject 执行 `Request()`，服务会在消息被存储后回复你；但如果你只是 publish，则不会收到这类确认。你也可以在 Stream 配置中将 `NoAck` 设为 `true` 来禁用确认。
 
-Consumers have 3 acknowledgement modes:
+Consumer 有 3 种确认模式：
 
-| Mode          | Description                                                                                                                                             |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `AckExplicit` | This requires every message to be specifically acknowledged, it's the only supported option for pull-based Consumers                                    |
-| `AckAll`      | In this mode if you acknowledge message `100` it will also acknowledge message `1`-`99`, this is good for processing batches and to reduce ack overhead |
-| `AckNone`     | No acknowledgements are supported                                                                                                                       |
+| Mode          | 说明 |
+| ------------- | ---- |
+| `AckExplicit` | 每条消息都必须单独 ACK；这是 pull-based Consumer 唯一支持的选项 |
+| `AckAll`      | ACK 了第 `100` 条时，也会连带 ACK `1`-`99`；适合批处理，可减少 ACK 开销 |
+| `AckNone`     | 不支持 ACK |
 
-To understand how Consumers track messages we will start with a clean `ORDERS` Stream and `DISPATCH` Consumer.
+为了理解 Consumer 如何跟踪消息状态，我们从一个干净的 `ORDERS` Stream 和 `DISPATCH` Consumer 开始。
 
 ```shell
 nats str info ORDERS
@@ -84,7 +90,7 @@ Statistics:
     Active Consumers: 1
 ```
 
-The Set is entirely empty
+Stream 目前完全为空。
 
 ```shell
 nats con info ORDERS DISPATCH
@@ -100,9 +106,9 @@ State:
     Redelivered Messages: 0
 ```
 
-The Consumer has no messages outstanding and has never had any (Consumer sequence is 1).
+该 Consumer 没有任何未完成消息，并且从未处理过消息（Consumer sequence 为 1）。
 
-We publish one message to the Stream and see that the Stream received it:
+向 Stream 发布一条消息，并确认 Stream 已接收：
 
 ```shell
 nats pub ORDERS.processed "order 4"
@@ -121,7 +127,7 @@ Statistics:
     Active Consumers: 1
 ```
 
-As the Consumer is pull-based, we can fetch the message, ack it, and check the Consumer state:
+由于这个 Consumer 是 pull-based 的，我们可以拉取消息、ACK，并查看 Consumer 状态：
 
 ```shell
 nats con next ORDERS DISPATCH
@@ -143,9 +149,9 @@ State:
     Redelivered Messages: 0
 ```
 
-The message got delivered and acknowledged - `Acknowledgement floor` is `1` and `1`, the sequence of the Consumer is `2` which means its had only the one message through and got acked. Since it was acked, nothing is pending or redelivering.
+消息已投递并完成 ACK：`Acknowledgement floor` 为 `1` 与 `1`；Consumer 的 sequence 为 `2`，表示它只处理过这一条消息且已 ACK。因为已经 ACK，所以没有 pending，也不会重投递。
 
-We'll publish another message, fetch it but not Ack it this time and see the status:
+再发布一条消息；这次拉取但不 ACK，观察状态：
 
 ```shell
 nats pub ORDERS.processed "order 5"
@@ -155,7 +161,7 @@ nats pub ORDERS.processed "order 5"
 Published 7 bytes to ORDERS.processed
 ```
 
-Get the next message from the consumer (but do not acknowledge it)
+从 Consumer 获取下一条消息（但不要确认它）
 
 ```shell
 nats consumer next ORDERS DISPATCH --no-ack
@@ -166,7 +172,7 @@ nats consumer next ORDERS DISPATCH --no-ack
 order 5
 ```
 
-Show the consumer info
+查看 Consumer 信息
 
 ```shell
 nats consumer info ORDERS DISPATCH
@@ -181,9 +187,9 @@ State:
     Redelivered Messages: 0
 ```
 
-Now we can see the Consumer has processed 2 messages (obs sequence is 3, next message will be 3) but the Ack floor is still 1 - thus 1 message is pending acknowledgement. Indeed this is confirmed in the `Pending messages`.
+现在可以看到：Consumer 处理过 2 次投递（观察到 sequence 为 3，表示下一条将是第 3 次投递），但 Ack floor 仍然是 1，因此有 1 条消息处于“待确认（pending）”状态，这也在 `Pending Messages` 中得到了印证。
 
-If I fetch it again and again do not ack it:
+如果我反复拉取它，但一直不 ACK：
 
 ```shell
 nats consumer next ORDERS DISPATCH --no-ack
@@ -194,7 +200,7 @@ nats consumer next ORDERS DISPATCH --no-ack
 order 5
 ```
 
-Show the consumer info again
+再次查看 Consumer 信息
 
 ```shell
 nats consumer info ORDERS DISPATCH
@@ -209,9 +215,9 @@ State:
     Redelivered Messages: 1
 ```
 
-The Consumer sequence increases - each delivery attempt increases the sequence - and our redelivered count also goes up.
+Consumer sequence 会增加——每一次投递尝试都会增加序号——同时 `Redelivered Messages` 也会递增。
 
-Finally, if I then fetch it again and ack it this time:
+最后，再拉取一次并在这次进行 ACK：
 
 ```shell
 nats consumer next ORDERS DISPATCH 
@@ -224,7 +230,7 @@ order 5
 Acknowledged message
 ```
 
-Show the consumer info
+查看 Consumer 信息
 
 ```shell
 nats consumer info ORDERS DISPATCH
@@ -239,49 +245,49 @@ State:
     Redelivered Messages: 0
 ```
 
-Having now Acked the message there are no more pending.
+现在消息已被 ACK，因此不再有 pending。
 
-Additionally, there are a few types of acknowledgements:
+另外，还有几种 ACK 类型：
 
-| Type          | Bytes       | Description                                                                                                                        |
-| ------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `AckAck`      | nil, `+ACK` | Acknowledges a message was completely handled                                                                                      |
-| `AckNak`      | `-NAK`      | Signals that the message will not be processed now and processing can move onto the next message, NAK'd message will be retried    |
-| `AckProgress` | `+WPI`      | When sent before the AckWait period indicates that work is ongoing and the period should be extended by another equal to `AckWait` |
-| `AckNext`     | `+NXT`      | Acknowledges the message was handled and requests delivery of the next message to the reply subject. Only applies to Pull-mode.    |
-| `AckTerm`     | `+TERM`     | Instructs the server to stop redelivery of a message without acknowledging it as successfully processed                            |
+| Type          | Bytes       | 说明 |
+| ------------- | ----------- | ---- |
+| `AckAck`      | nil, `+ACK` | 确认消息已被完整处理 |
+| `AckNak`      | `-NAK`      | 表示“当前不处理该消息”，可以继续处理下一条；被 NAK 的消息会被重试 |
+| `AckProgress` | `+WPI`      | 在 AckWait 到期前发送，表示工作仍在进行；AckWait 会再延长一个同样长度的周期 |
+| `AckNext`     | `+NXT`      | 确认当前消息已处理，并请求将下一条消息投递到 reply subject；仅适用于 Pull 模式 |
+| `AckTerm`     | `+TERM`     | 指示服务器停止对该消息的重投递，但并不表示它被成功处理 |
 
-So far all of the examples were the `AckAck` type of acknowledgement, by replying to the Ack with the body as indicated in `Bytes` you can pick what mode of acknowledgement you want. Note that this description is documenting the internal JetStream protocol. Client libraries offer APIs for performing all the above acknowledgments using specific APIs where you don't worry about the internal protocol payloads.
+到目前为止，示例使用的都是 `AckAck`。你可以根据 `Bytes` 列所示的 body 内容来选择想要的 ACK 模式。注意：这里描述的是 JetStream 的内部协议细节；各客户端库通常提供了更高层的 API 来完成上述 ACK，你无需关心底层 payload。
 
-All of these acknowledgement modes, except `AckNext`, support double acknowledgement - if you set a reply subject when acknowledging the server will in turn acknowledge having received your ACK.
+除 `AckNext` 外，以上 ACK 模式都支持“双重确认”（double acknowledgement）：如果你在 ACK 时设置 reply subject，服务器会再回复一次，确认它已经收到你的 ACK。
 
-The `+NXT` acknowledgement can have a few formats: `+NXT 10` requests 10 messages and `+NXT {"no_wait": true}` which is the same data that can be sent in a Pull Request.
+`+NXT` 有几种格式：例如 `+NXT 10` 表示请求 10 条消息；`+NXT {"no_wait": true}` 表示携带与 Pull Request 相同结构的数据。
 
-## Exactly Once Semantics
+## “恰好一次”（Exactly Once）语义
 
-JetStream supports Exactly Once publication and consumption by combining Message Deduplication and double acks.
+JetStream 通过结合“消息去重”和“双重确认”，支持“恰好一次”的发布与消费语义。
 
-On the publishing side you can avoid duplicate message ingestion using the [Message Deduplication](model\_deep\_dive.md#message-deduplication) feature.
+在发布侧，你可以通过 [消息去重](model\_deep\_dive.md#message-deduplication) 来避免重复写入。
 
-Consumers can be 100% sure a message was correctly processed by requesting the server Acknowledge having received your acknowledgement (sometimes referred to as double-acking) by calling the message's `AckSync()` (rather than `Ack()`) function which sets a reply subject on the Ack and waits for a response from the server on the reception and processing of the acknowledgement. If the response received from the server indicates success you can be sure that the message will never be re-delivered by the consumer (due to a loss of your acknowledgement).
+在消费侧，若希望 100% 确认消息确实被正确处理，可以要求服务器确认“已收到你的 ACK”（也称 double-acking）。做法是调用消息的 `AckSync()`（而非 `Ack()`）：它会在 ACK 上设置 reply subject，并等待服务器对“ACK 已接收并处理”的回应。如果服务器返回成功，你就可以确信：因为 ACK 丢失而导致的再次重投递不会发生。
 
-## Consumer Starting Position
+## Consumer 的起始位置
 
-When setting up a Consumer you can decide where to start, the system supports the following for the `DeliverPolicy`:
+创建 Consumer 时，你可以决定从哪里开始投递。系统通过 `DeliverPolicy` 支持以下起点：
 
-| Policy              | Description                                                                |
-| ------------------- | -------------------------------------------------------------------------- |
-| `all`               | Delivers all messages that are available                                   |
-| `last`              | Delivers the latest message, like a `tail -n 1 -f`                         |
-| `new`               | Delivers only new messages that arrive after subscribe time                |
-| `by_start_time`     | Delivers from a specific time onward. Requires `OptStartTime` to be set    |
-| `by_start_sequence` | Delivers from a specific stream sequence. Requires `OptStartSeq` to be set |
+| Policy              | 说明 |
+| ------------------- | ---- |
+| `all`               | 投递所有可用消息 |
+| `last`              | 只投递最新一条消息，类似 `tail -n 1 -f` |
+| `new`               | 只投递订阅开始之后新到达的消息 |
+| `by_start_time`     | 从指定时间点之后开始投递；需要设置 `OptStartTime` |
+| `by_start_sequence` | 从指定的 Stream 序列号开始投递；需要设置 `OptStartSeq` |
 
-Regardless of what mode you set, this is only the starting point. Once started it will always give you what you have not seen or acknowledged. So this is merely how it picks the very first message.
+无论你选择哪种策略，这都只是“起点”。一旦开始投递，Consumer 会持续给你你尚未见过或尚未确认的消息。因此，上述策略只决定“第一条消息从哪里开始”。
 
-Let's look at each of these, first we make a new Stream `ORDERS` and add 100 messages to it.
+我们逐一看看这些策略。首先创建一个新 Stream `ORDERS`，并向其中写入 100 条消息。
 
-Now create a `DeliverAll` pull-based Consumer:
+创建一个 `DeliverAll` 的 pull-based Consumer：
 
 ```shell
 nats consumer add ORDERS ALL --pull --filter ORDERS.processed --ack none --replay instant --deliver all 
@@ -295,7 +301,7 @@ order 1
 Acknowledged message
 ```
 
-Now create a `DeliverLast` pull-based Consumer:
+创建一个 `DeliverLast` 的 pull-based Consumer：
 
 ```shell
 nats consumer add ORDERS LAST --pull --filter ORDERS.processed --ack none --replay instant --deliver last
@@ -309,7 +315,7 @@ order 100
 Acknowledged message
 ```
 
-Now create a `MsgSetSeq` pull-based Consumer:
+创建一个从第 10 条开始的 pull-based Consumer：
 
 ```shell
 nats consumer add ORDERS TEN --pull --filter ORDERS.processed --ack none --replay instant --deliver 10
@@ -323,7 +329,7 @@ order 10
 Acknowledged message
 ```
 
-And finally a time-based Consumer. Let's add some messages a minute apart:
+最后是基于时间的 Consumer。先每隔 1 分钟写入一条消息：
 
 ```shell
 nats stream purge ORDERS
@@ -334,7 +340,7 @@ do
 done
 ```
 
-Then create a Consumer that starts 2 minutes ago:
+然后创建一个从 2 分钟前开始的 Consumer：
 
 ```shell
 nats consumer add ORDERS 2MIN --pull --filter ORDERS.processed --ack none --replay instant --deliver 2m
@@ -348,11 +354,11 @@ order 2
 Acknowledged message
 ```
 
-## Ephemeral Consumers
+## 临时（Ephemeral）Consumer
 
-So far, all the Consumers you have seen were Durable, meaning they exist even after you disconnect from JetStream. In our Orders scenario, though the `MONITOR` a Consumer could very well be a short-lived thing there just while an operator is debugging the system, there is no need to remember the last seen position if all you are doing is wanting to observe the real-time state.
+到目前为止，你看到的 Consumer 都是 Durable 的：即使你断开与 JetStream 的连接，它们仍然存在。在订单（Orders）场景中，像 `MONITOR` 这样的 Consumer 可能只是在运维排查时短暂存在；如果你只是想观察实时状态，就没必要记住“上次看到的位置”。
 
-In this case, we can make an Ephemeral Consumer by first subscribing to the delivery subject, then creating a durable and giving it no durable name. An Ephemeral Consumer exists as long as any subscription is active on its delivery subject. It is automatically be removed, after a short grace period to handle restarts, when there are no subscribers.
+这种情况下，我们可以创建 Ephemeral Consumer：先订阅投递 subject，然后创建 Consumer 时不设置 durable 名称。Ephemeral Consumer 只要其投递 subject 上还有活跃订阅就会存在；当没有订阅者时（会有一个很短的宽限期用于处理重启），系统会自动将其删除。
 
 Terminal 1:
 
@@ -366,15 +372,15 @@ Terminal 2:
 nats consumer add ORDERS --filter '' --ack none --target 'my.monitor' --deliver last --replay instant --ephemeral
 ```
 
-The `--ephemeral` switch tells the system to make an Ephemeral Consumer.
+`--ephemeral` 选项用于告诉系统创建 Ephemeral Consumer。
 
-## Consumer Message Rates
+## Consumer 的消息投递速率
 
-Typically, what you want is if a new Consumer is made the selected messages are delivered to you as quickly as possible. You might want to replay messages at the rate they arrived though, meaning if messages first arrived 1 minute apart, and you make a new Consumer it will get the messages a minute apart.
+通常情况下，你希望新建 Consumer 后，消息能尽快投递给你。但有时你希望按“原始到达速率”回放：例如消息最初每分钟到达一次，那么你新建 Consumer 后也希望每分钟收到一条。
 
-This is useful in load testing scenarios etc. This is called the `ReplayPolicy` and have values of `ReplayInstant` and `ReplayOriginal`.
+这在压测等场景很有用。该行为由 `ReplayPolicy` 控制，取值包括 `ReplayInstant` 与 `ReplayOriginal`。
 
-You can only set `ReplayPolicy` on push-based Consumers.
+`ReplayPolicy` 只能用于 push-based Consumer。
 
 ```shell
 nats consumer add ORDERS REPLAY --target out.original --filter ORDERS.processed --ack none --deliver all --sample 100 --replay original
@@ -416,25 +422,25 @@ Listening on [out.original]
 ^C
 ```
 
-## Ack Sampling
+## ACK 采样（Ack Sampling）
 
-In the earlier sections we saw that samples are being sent to a monitoring system. Let's look at that in depth; how the monitoring system works and what it contains.
+前面的章节提到系统会向监控系统发送采样数据。这里我们深入看看：采样是如何工作的，以及采样内容包含什么。
 
-As messages pass through a Consumer you'd be interested in knowing how many are being redelivered and how many times but also how long it takes for messages to be acknowledged.
+当消息经过某个 Consumer 时，你通常会关心：有多少消息发生了重投递、重投递了多少次，以及消息从投递到被 ACK 的耗时。
 
-Consumers can sample Ack'ed messages for you and publish samples so your monitoring system can observe the health of a Consumer. We will add support for this to [NATS Surveyor](https://github.com/nats-io/nats-surveyor).
+Consumer 可以对已 ACK 的消息进行采样，并将样本发布出去，供监控系统观察该 Consumer 的健康状况。我们将把这一能力加入到 [NATS Surveyor](https://github.com/nats-io/nats-surveyor) 中。
 
-### Configuration
+### 配置
 
-You can configure a Consumer for sampling bypassing the `--sample 80` option to `nats consumer add`, this tells the system to sample 80% of Acknowledgements.
+你可以在 `nats consumer add` 时通过 `--sample 80` 为 Consumer 启用采样，表示对 80% 的 ACK 进行采样。
 
-When viewing info of a Consumer you can tell if it's sampled or not:
+查看 Consumer 信息时，可以判断是否启用了采样：
 
 ```shell
 nats consumer info ORDERS NEW
 ```
 
-Output contains
+输出中会包含：
 
 ```
 ...
@@ -442,32 +448,32 @@ Output contains
 ...
 ```
 
-## Storage Overhead
+## 存储开销（Storage Overhead）
 
-JetStream file storage is very efficient, storing as little extra information about the message as possible.
+JetStream 的文件存储非常高效，会尽可能少地存储与消息相关的额外信息。
 
-We do store some message data with each message, namely:
+但每条消息仍会附带存储一些数据，包括：
 
-* Message headers
-* The subject it was received on
-* The time it was received
-* The message payload
-* A hash of the message
-* The message sequence
-* A few other bits like the length of the subject and the length of headers
+* 消息 headers
+* 接收时的 subject
+* 接收时间
+* 消息 payload
+* 消息 hash
+* 消息序列号
+* 其他一些信息，例如 subject 的长度、headers 的长度等
 
-Without any headers the size is:
+不带 headers 时，记录大小为：
 
 ```
 length of the message record (4bytes) + seq(8) + ts(8) + subj_len(2) + subj + msg + hash(8)
 ```
 
-A 5 byte `hello` message without headers will take 39 bytes.
+一条 5 字节的 `hello` 消息（无 headers）会占用 39 字节。
 
-With headers:
+带 headers 时：
 
 ```
 length of the message record (4bytes) + seq(8) + ts(8) + subj_len(2) + subj + hdr_len(4) + hdr + msg + hash(8)
 ```
 
-So if you are publishing many small messages the overhead will be, relatively speaking, quite large, but for larger messages the overhead is very small. If you publish many small messages it's worth trying to optimize the subject length.
+因此，如果你发布大量小消息，相对开销会显得比较大；而对大消息来说，相对开销则很小。如果你的业务会发布很多小消息，值得考虑优化 subject 的长度。
