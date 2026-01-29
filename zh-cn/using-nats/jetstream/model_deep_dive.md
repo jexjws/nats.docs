@@ -307,7 +307,7 @@ order 1
 Acknowledged message
 ```
 
-创建一个 `DeliverLast` 的 pull-based Consumer：
+创建一个 `DeliverLast` 的拉取型消费者：
 
 ```shell
 nats consumer add ORDERS LAST --pull --filter ORDERS.processed --ack none --replay instant --deliver last
