@@ -362,11 +362,11 @@ order 2
 Acknowledged message
 ```
 
-## 临时（Ephemeral）Consumer
+## 临时消费者 (Ephemeral Consumers)
 
-到目前为止，你看到的 Consumer 都是 Durable 的：即使你断开与 JetStream 的连接，它们仍然存在。在订单（Orders）场景中，像 `MONITOR` 这样的 Consumer 可能只是在运维排查时短暂存在；如果你只是想观察实时状态，就没必要记住“上次看到的位置”。
+到目前为止，你看到的 Consumer 都是“持久化”（Durable）的：即使你断开与 JetStream 的连接，它们仍然存在。但在我们的订单场景中，像 `MONITOR` 这样的 Consumer 可能只是运维人员在调试系统时的一个短命组件；如果你只是想观察实时状态，就没必要让服务器记住你上次看到哪儿了。
 
-这种情况下，我们可以创建 Ephemeral Consumer：先订阅投递 subject，然后创建 Consumer 时不设置 durable 名称。Ephemeral Consumer 只要其投递 subject 上还有活跃订阅就会存在；当没有订阅者时（会有一个很短的宽限期用于处理重启），系统会自动将其删除。
+这种情况下，我们可以创建一个临时消费者（Ephemeral Consumer）。方法是：先订阅要投递到的主题，然后创建 消费者 时不设置持久化名称。只要该投递主题上还有活跃的订阅，临时消费者就会一直存在；一旦没有了订阅者，系统在一段处理重启的短暂宽限期之后，系统会自动将其删除。
 
 Terminal 1:
 
@@ -382,9 +382,9 @@ nats consumer add ORDERS --filter '' --ack none --target 'my.monitor' --deliver 
 
 `--ephemeral` 选项用于告诉系统创建 Ephemeral Consumer。
 
-## Consumer 的消息投递速率
+## 消费者消息速率 (Consumer Message Rates)
 
-通常情况下，你希望新建 Consumer 后，消息能尽快投递给你。但有时你希望按“原始到达速率”回放：例如消息最初每分钟到达一次，那么你新建 Consumer 后也希望每分钟收到一条。
+通常情况下，当你创建一个新消费者时，你希望它能尽快把选中的消息发给你。但有时你希望按“原始到达速率”回放：例如消息最初每分钟到达一次，那么你新建 Consumer 后也希望每分钟收到一条。
 
 这在压测等场景很有用。该行为由 `ReplayPolicy` 控制，取值包括 `ReplayInstant` 与 `ReplayOriginal`。
 
@@ -432,11 +432,11 @@ Listening on [out.original]
 
 ## ACK 采样（Ack Sampling）
 
-前面的章节提到系统会向监控系统发送采样数据。这里我们深入看看：采样是如何工作的，以及采样内容包含什么。
+前面的章节提到系统会向监控系统发送采样数据。这里我们深入看看：监控系统是如何工作的，以及采样内容包含什么。
 
-当消息经过某个 Consumer 时，你通常会关心：有多少消息发生了重投递、重投递了多少次，以及消息从投递到被 ACK 的耗时。
+当消息流经消费者时，你可能会关心：有多少消息被重传了？重传了多少次？以及确认一条消息到底花了多长时间？
 
-Consumer 可以对已 ACK 的消息进行采样，并将样本发布出去，供监控系统观察该 Consumer 的健康状况。我们将把这一能力加入到 [NATS Surveyor](https://github.com/nats-io/nats-surveyor) 中。
+Consumer 可以为你对已 ACK 的消息进行采样，并将样本发布出去，供监控系统观察该 Consumer 的健康状况。我们将把这一能力加入到 [NATS Surveyor](https://github.com/nats-io/nats-surveyor) 中。
 
 ### 配置
 
@@ -462,18 +462,18 @@ JetStream 的文件存储非常高效，会尽可能少地存储与消息相关�
 
 但每条消息仍会附带存储一些数据，包括：
 
-* 消息 headers
-* 接收时的 subject
+* 消息头 (Message headers)
+* 消息接收时所在的主题 (Subject)
 * 接收时间
-* 消息 payload
-* 消息 hash
-* 消息序列号
-* 其他一些信息，例如 subject 的长度、headers 的长度等
+* 消息体 payload
+* 消息哈希值
+* 消息序列号 (Sequence)
+* 其他少量信息，如 subject 的长度、headers 的长度
 
-不带 headers 时，记录大小为：
+不带 headers 时，大小计算如下：
 
 ```
-length of the message record (4bytes) + seq(8) + ts(8) + subj_len(2) + subj + msg + hash(8)
+消息记录长度 (4字节) + 序列号(8) + 时间戳(8) + 主题长度(2) + 主题内容 + 消息内容 + 哈希值(8)
 ```
 
 一条 5 字节的 `hello` 消息（无 headers）会占用 39 字节。
@@ -481,7 +481,7 @@ length of the message record (4bytes) + seq(8) + ts(8) + subj_len(2) + subj + ms
 带 headers 时：
 
 ```
-length of the message record (4bytes) + seq(8) + ts(8) + subj_len(2) + subj + hdr_len(4) + hdr + msg + hash(8)
+消息记录长度 (4字节) + 序列号(8) + 时间戳(8) + 主题长度(2) + 主题内容 + Header长度(4) + Header内容 + 消息内容 + 哈希值(8)
 ```
 
-因此，如果你发布大量小消息，相对开销会显得比较大；而对大消息来说，相对开销则很小。如果你的业务会发布很多小消息，值得考虑优化 subject 的长度。
+因此，如果你发布大量的小消息，相对而言，额外开销会显得比较大；但对于大消息来说，这点开销就微乎其微了。如果你确实需要发布大量小消息，尝试优化（缩短）主题长度是值得一试的。
