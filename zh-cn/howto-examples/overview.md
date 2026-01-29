@@ -54,31 +54,31 @@ nats
 
 usage: nats [<flags>] <command> [<args> ...]
 
-NATS 工具
+NATS Utility
 
-用于 NATS Server 和 JetStream 的管理。
+NATS Server and JetStream administration.
 
-使用 'nats cheat' 查看命令速查表
+See 'nats cheat' for a quick cheatsheet of commands
 
 Commands:
-  account    帐户信息和状态
-  bench      基准测试工具
-  consumer   JetStream 消费者管理
-  context    管理 NATS 配置上下文
-  errors     错误代码文档
-  events     显示通告与事件
-  kv         与基于 JetStream 的键值存储交互
-  latency    在两个 NATS 服务器之间执行延迟测试
-  micro      微服务发现与管理
-  object     与 JetStream 对象存储交互
-  publish    通用数据发布工具
-  request    通用请求-响应请求工具
-  reply      通用服务响应工具
-  rtt        计算到 NATS 服务器的往返时间
-  schema     模式工具
-  server     服务器信息
-  stream     JetStream 流管理
-  subscribe  通用订阅客户端
+  account    Account information and status
+  bench      Benchmark utility
+  consumer   JetStream Consumer management
+  context    Manage NATS configuration contexts
+  errors     Error code documentation
+  events     Show Advisories and Events
+  kv         Interacts with a JetStream based Key-Value store
+  latency    Perform latency tests between two NATS servers
+  micro      Micro Services discovery and management
+  object     Interacts with a JetStream Object Store
+  publish    Generic data publish utility
+  request    Generic request-reply request utility
+  reply      Generic service reply utility
+  rtt        Compute round-trip time to NATS server
+  schema     Schema tools
+  server     Server information
+  stream     JetStream Stream management
+  subscribe  Generic subscription client
 ```
 
 要了解发布操作，请使用以下命令：
@@ -86,29 +86,30 @@ Commands:
 ```shell
 nats publish 
 
-用法: nats publish [<flags>] <subject> [<body>]
+usage: nats publish [<flags>] <subject> [<body>]
 
-通用数据发布工具
+Generic data publish utility
 
-消息的 Body 和 Header 值可以使用 Go 模板来创建唯一消息。
+Body and Header values of the messages may use Go templates to create unique
+messages.
 
   nats pub test --count 10 "Message {{Count}} @ {{Time}}"
 
-发送多个包含长度为 10 到 100 的随机字符串的消息：
+Multiple messages with random strings between 10 and 100 long:
 
   nats pub test --count 10 "Message {{Count}}: {{ Random 10 100 }}"
 
-可用的模板函数有：
+Available template functions are:
 
-  Count            消息编号
-  TimeStamp        RFC3339 格式的当前时间
-  Unix             自 1970 年起的秒数（UTC）
-  UnixNano         自 1970 年起的纳秒数（UTC）
-  Time             当前时间
-  ID               唯一 ID
-  Random(min, max) 生成长度至少为 min、最多为 max 的随机字符串
+  Count            the message number
+  TimeStamp        RFC3339 format current time
+  Unix             seconds since 1970 in UTC
+  UnixNano         nanoseconds since 1970 in UTC
+  Time             the current time
+  ID               a unique ID
+  Random(min, max) random string at least min long, at most max
 
 Args:
-  <subject>  要发布到的主题
-  [<body>]   消息体
+  <subject>  Subject to subscribe to
+  [<body>]   Message body
 ```
