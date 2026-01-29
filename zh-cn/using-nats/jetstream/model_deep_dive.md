@@ -346,7 +346,7 @@ do
 done
 ```
 
-然后创建一个从 2 分钟前开始的 Consumer：
+然后创建一个 Consumer，从 2 分钟前开始：
 
 ```shell
 nats consumer add ORDERS 2MIN --pull --filter ORDERS.processed --ack none --replay instant --deliver 2m
