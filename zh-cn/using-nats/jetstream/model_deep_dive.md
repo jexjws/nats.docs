@@ -321,7 +321,7 @@ order 100
 Acknowledged message
 ```
 
-创建一个从第 10 条开始的 pull-based Consumer：
+创建一个 `MsgSetSeq` 的拉取型消费者：
 
 ```shell
 nats consumer add ORDERS TEN --pull --filter ORDERS.processed --ack none --replay instant --deliver 10
