@@ -261,7 +261,7 @@ State:
 | `AckNak`      | `-NAK`      | 告知服务端：先不处理该消息、继续处理下一条；被 NAK 的消息稍后会被重试 |
 | `AckProgress` | `+WPI`      | 在 AckWait 到期前发送，表示客户端还在处理这个消息，希望将等待期再延长一个 `AckWait` 的时长。 |
 | `AckNext`     | `+NXT`      | 确认当前消息已处理，并请求将下一条消息投递到 reply subject；仅适用于 Pull 模式 |
-| `AckTerm`     | `+TERM`     | 指示服务器停止对该消息的重投递，但并不表示它被成功处理 |
+| `AckTerm`     | `+TERM`     | 指示服务器停止重传该消息，且不将其标记为处理成功 |
 
 到目前为止，示例使用的都是 `AckAck`。你可以根据 `Bytes` 列所示的 body 内容来选择想要的 ACK 模式。注意：这里描述的是 JetStream 的内部协议细节；各客户端库通常提供了更高层的 API 来完成上述 ACK，你无需关心底层 payload。
 
