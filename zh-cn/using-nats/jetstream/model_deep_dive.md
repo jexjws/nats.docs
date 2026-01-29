@@ -263,7 +263,9 @@ State:
 | `AckNext`     | `+NXT`      | 确认当前消息已处理，并请求将下一条消息投递到 reply subject；仅适用于 Pull 模式 |
 | `AckTerm`     | `+TERM`     | 指示服务器停止重传该消息，且不将其标记为处理成功 |
 
-到目前为止，示例使用的都是 `AckAck`。你可以根据 `Bytes` 列所示的 body 内容来选择想要的 ACK 模式。注意：这里描述的是 JetStream 的内部协议细节；各客户端库通常提供了更高层的 API 来完成上述 ACK，你无需关心底层 payload。
+到目前为止，我们的示例使用的都是 `AckAck` 类型。你可以根据 `Bytes` 列所示的 body 内容来选择想要的 ACK 模式。
+
+注意： 这里描述的是 JetStream 的内部协议细节。在实际开发中，客户端库都提供了专门的 API 来执行这些确认操作，你完全不需要担心底层的 payload 该怎么写。
 
 除 `AckNext` 外，以上 ACK 模式都支持“双重确认”（double acknowledgement）：如果你在发送 ACK 时设置了 reply subject，服务器在收到你的确认后会反过来再回复一次，确认它已经收到你的 ACK。
 
