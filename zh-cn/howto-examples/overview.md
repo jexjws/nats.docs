@@ -8,7 +8,7 @@
 
 我们通常使用 [NATS 命令行界面](../using-nats/nats-tools/nats_cli/README.md)（NATS CLI），您可在此处[下载](https://github.com/nats-io/natscli/releases)。
 
-NATS CLI 是一个独立工具，基于 Golang API 构建。所有通过 CLI 完成的操作也可以通过 [客户端 API](#编程示例与客户端-API) 实现（有时也可以通过监听特定的主题实现）。
+​NATS CLI 是一个基于 Golang API 构建的独立工具，其中并没有什么“独家秘籍”。凡是能通过 CLI 完成的操作，也都能通过[客户端 API](#编程示例与客户端-API) 实现（偶尔可能需要监听一些特定的“魔法”主题）。
 
 示例大致分为以下几类：
 
