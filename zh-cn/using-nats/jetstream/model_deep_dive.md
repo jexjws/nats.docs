@@ -293,7 +293,7 @@ JetStream 通过结合“消息去重”和“双重确认”，支持“恰好�
 
 我们逐一看看这些策略。首先创建一个新 Stream `ORDERS`，并向其中写入 100 条消息。
 
-创建一个 `DeliverAll` 的 pull-based Consumer：
+现在，创建一个 `DeliverAll` 的拉取型消费者：
 
 ```shell
 nats consumer add ORDERS ALL --pull --filter ORDERS.processed --ack none --replay instant --deliver all 
