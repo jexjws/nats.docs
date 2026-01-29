@@ -47,7 +47,7 @@ nats-server -DV
 
 ### CLI
 
-`nats-cli` 是用 Golang 编写的单个可执行文件，使用起来挺直观的，命令和选项按层级组织。
+`nats-cli` 是用 Golang 编写的单个可执行文件。它的选项按层级组织，非常直观，基本无需额外解释即可上手。
 
 ```shell
 nats 
