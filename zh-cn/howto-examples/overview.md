@@ -27,7 +27,7 @@
 
 ## 开始之前
 
-示例尽量手把手，并假设读者没有太多相关知识。要开始使用，您需要安装 [nats-server](https://github.com/nats-io/nats-server/releases) 和 [nats-cli](https://github.com/nats-io/natscli/releases)。
+​所有的示例都力求提供“端到端”的完整指引，并假设读者几乎不需要预备知识。要开始使用，您需要安装 [nats-server](https://github.com/nats-io/nats-server/releases) 和 [nats-cli](https://github.com/nats-io/natscli/releases)。
 
 ### 服务器
 
