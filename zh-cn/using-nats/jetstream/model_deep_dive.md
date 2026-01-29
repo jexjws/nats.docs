@@ -1,8 +1,8 @@
-# JetStream 模型深入解析
+# JetStream 模型深度解析
 
 ## Stream 限制、保留与策略
 
-Stream 会把数据存储在磁盘上，但我们不可能永远保存所有数据，因此需要一些机制来自动控制 Stream 的规模。
+Stream（流）将数据存储在磁盘上，但由于存储空间有限，我们无法永久保留所有数据，因此需要一套自动控制规模的机制。
 
 在决定 Stream 存储数据的时间长短时，有三个关键特性在起作用。
 
@@ -10,31 +10,37 @@ Stream 会把数据存储在磁盘上，但我们不可能永远保存所有数�
 
 | Retention Policy  | 说明 |
 | ----------------- | ---- |
-| `LimitsPolicy`    | 通过限制“消息条数 / 总存储大小 / 消息最大年龄”来决定保留范围。 |
+| `LimitsPolicy`    | 根据消息总数、存储总量以及消息的“保质期”（时长）来设置上限。 |
 | `WorkQueuePolicy` | 消息会一直保留到被消费为止：也就是消息被投递给订阅应用（由某个 Consumer 根据 subject 过滤接收）。在这种模式下，同一条 Stream 覆盖到的每个 subject 同一时刻只能有一个 Consumer（不允许重叠 Consumer）。应用必须显式 ACK 该消息。 |
-| `InterestPolicy`  | 只要 Stream 上还存在 Consumer（若 Consumer 做了过滤，则需匹配消息 subject）且该消息尚未被 ACK，就会继续保留。只有当当前定义的所有 Consumer 都已收到订阅应用对该消息的显式 ACK 后，消息才会从 Stream 中删除。 |
+| `InterestPolicy`  | 只要流上还存在（与消息主题匹配的）消费者且该消息尚未被这些消费者确认（ACK），消息就会保留。一旦所有当前定义的消费者从订阅应用程序那里收到了对消息的明确确认（ACK），该消息随后就会从流中移除。 |
 
-在所有保留策略下，基础的上限限制都会生效：`MaxMsgs`（最多保留多少条消息）、`MaxBytes`（最多占用多少总字节数）以及 `MaxAge`（最多保留多老的消息）。在 `LimitsPolicy` 下，只有这些上限限制参与决策。
+在所有的保留策略中，**基础限制（Basic Limits）**都作为“天花板”起作用，包括：
 
-你还可以定义一些“让消息早于上限被删除”的条件：
+* `MaxMsgs`：总共保留多少条消息。
+* `MaxBytes`：数据集的总大小上限。
+* `MaxAge`：单条消息的最长保存时间。
 
-- 在 `WorkQueuePolicy` 中，只要该 Consumer 收到消息的 ACK，消息就会被移除。
-- 在 `InterestPolicy` 中，只要该 subject 上的所有 Consumer 都对该消息做了 ACK，消息就会被移除。
+对于 `LimitsPolicy`（限制策略）而言，它是唯一生效的规则。
 
-在 `WorkQueuePolicy` 与 `InterestPolicy` 中，年龄、大小与数量这三类上限限制仍然作为“硬上限”存在。
+而在另外两种策略中，消息可能会比这些限制预期的更早被移除：
 
-最后还有一个重要控制项：单条消息的最大尺寸。NATS 本身对最大消息尺寸有默认限制（默认 1 MiB），但你也可以通过 `MaxMsgSize` 指定某个 Stream 只接受不超过 1024 字节的消息。
+- 在 **`WorkQueuePolicy`** 中，一旦“那个”消费者发回 ACK，消息即被清理。
+- 在 `InterestPolicy` 中，只要该 subject 上的所有 Consumer 都对该消息发回了 ACK，消息即被清理。
 
-`Discard Policy` 用于规定当 `LimitsPolicy` 的限制被触发时，如何丢弃消息：
+即使消息还没被确认，如果触碰了 `MaxAge`、`MaxBytes` 或 `MaxMsgs` 的红线，它们依然会被强制移除。
+
+最后还有一个重要控制项：单条消息的最大尺寸。NATS 本身对最大消息尺寸有默认限制（默认 1 MiB），但你可以通过 `MaxMsgSize` 进一步限制 Stream 只接收（例如）1024 字节以内的消息。
+
+**丢弃策略（Discard Policy）**：定义了当达到 `LimitsPolicy` 设定的上限时该怎么办。
 
 - `DiscardOld`：丢弃旧消息，为新消息腾出空间
-- `DiscardNew`：拒绝新消息
+- `DiscardNew`：拒收新消息
 
 `WorkQueuePolicy` 是一种特殊模式：消息一旦被消费并 ACK，就会从 Stream 中删除。
 
 ## 消息去重（Message Deduplication）
 
-JetStream 通过 `Nats-Msg-Id` header 来识别重复消息：当检测到重复时会忽略写入，从而支持幂等写入。
+JetStream 支持幂等写入：它会根据消息头中的 `Nats-Msg-Id` 字段自动忽略重复的消息。
 
 ```shell
 nats req -H Nats-Msg-Id:1 ORDERS.new hello1
@@ -43,13 +49,13 @@ nats req -H Nats-Msg-Id:1 ORDERS.new hello3
 nats req -H Nats-Msg-Id:1 ORDERS.new hello4
 ```
 
-这里我们设置了 `Nats-Msg-Id:1`，告诉 JetStream：请确保这条消息不会重复写入。去重只会参考消息 ID，而不会比较 body。
+这里我们设置了 `Nats-Msg-Id:1`，它告诉 JetStream：请确保这条消息不会重复写入。只会通过消息 ID 去重，不会比较 body。
 
 ```shell
 nats stream info ORDERS
 ```
 
-从输出可以看到：系统检测到了重复发布，Stream 实际只存储了一条消息（第一条）。
+从输出可以看到：系统检测到了重复发布、Stream 实际只存储了一条消息（第一条）。
 
 ```
 ....
@@ -59,21 +65,21 @@ State:
                Bytes: 67 B
 ```
 
-默认的去重时间窗口是 2 分钟。创建 Stream 时可以用 `--dupe-window` 调整该窗口，但不建议设置得过大。
+默认的消息去重追踪时间窗口为 2 分钟。创建 Stream 时可以用 `--dupe-window` 调整，但不建议设置得过大。
 
-## 确认（Acknowledgement）模型
+## 确认模型 (Acknowledgement Models)
 
-Stream 支持对“已接收并已存储消息”进行确认：如果你对 Stream 配置覆盖的 subject 执行 `Request()`，服务会在消息被存储后回复你；但如果你只是 publish，则不会收到这类确认。你也可以在 Stream 配置中将 `NoAck` 设为 `true` 来禁用确认。
+流支持确认接收到的消息。如果你对 Stream 配置覆盖的 subject 发送 `Request()`，服务端就会在确保存储好消息后给你一个答复；但如果你只是简单的 publish（发布），它就不会理你。另外，你也可以在配置中将 `NoAck` 设为 `true` 来禁用流级别的确认机制。
 
 Consumer 有 3 种确认模式：
 
 | Mode          | 说明 |
 | ------------- | ---- |
-| `AckExplicit` | 每条消息都必须单独 ACK；这是 pull-based Consumer 唯一支持的选项 |
-| `AckAll`      | ACK 了第 `100` 条时，也会连带 ACK `1`-`99`；适合批处理，可减少 ACK 开销 |
-| `AckNone`     | 不支持 ACK |
+| `AckExplicit` | **显式确认**。要求对每一条消息都进行专门的确认。这是拉取型（Pull-based）消费者的唯一选择。 |
+| `AckAll`      | **累计确认。** 在这种模式下，如果你确认了第 100 条消息，那么前面的第 1 到 99 条也会被视作已确认。这非常适合批量处理，能省掉不少确认开销。 |
+| `AckNone`     | **无需确认。** 压根不支持任何确认操作。 |
 
-为了理解 Consumer 如何跟踪消息状态，我们从一个干净的 `ORDERS` Stream 和 `DISPATCH` Consumer 开始。
+为了弄清消费者是如何追踪消息的，我们先从一个干净的 `ORDERS` 流和一个 `DISPATCH` 消费者开始演示。
 
 ```shell
 nats str info ORDERS
@@ -149,9 +155,9 @@ State:
     Redelivered Messages: 0
 ```
 
-消息已投递并完成 ACK：`Acknowledgement floor` 为 `1` 与 `1`；Consumer 的 sequence 为 `2`，表示它只处理过这一条消息且已 ACK。因为已经 ACK，所以没有 pending，也不会重投递。
+消息已投递并完成 ACK：`Acknowledgement floor` 为 `1` 与 `1`；Consumer 的 sequence 为 `2`，表示它只处理过这一条消息且已 ACK。因为已经 ACK，所以没有 pending，也不会重新投递。
 
-再发布一条消息；这次拉取但不 ACK，观察状态：
+再发布一条消息；客户端这次拉取消息但不确认，观察状态：
 
 ```shell
 nats pub ORDERS.processed "order 5"
@@ -245,15 +251,15 @@ State:
     Redelivered Messages: 0
 ```
 
-现在消息已被 ACK，因此不再有 pending。
+在确认完消息后，队列中就不再有待处理（pending）的消息了。
 
-另外，还有几种 ACK 类型：
+此外，确认（Acknowledgement）其实有多种类型：
 
 | Type          | Bytes       | 说明 |
 | ------------- | ----------- | ---- |
-| `AckAck`      | nil, `+ACK` | 确认消息已被完整处理 |
-| `AckNak`      | `-NAK`      | 表示“当前不处理该消息”，可以继续处理下一条；被 NAK 的消息会被重试 |
-| `AckProgress` | `+WPI`      | 在 AckWait 到期前发送，表示工作仍在进行；AckWait 会再延长一个同样长度的周期 |
+| `AckAck`      | nil, `+ACK` | 确认消息已完全处理完毕。 |
+| `AckNak`      | `-NAK`      | 告知服务端：先不处理该消息、继续处理下一条；被 NAK 的消息稍后会被重试 |
+| `AckProgress` | `+WPI`      | 在 AckWait 到期前发送，表示客户端还在处理这个消息，希望将等待期再延长一个 `AckWait` 的时长。 |
 | `AckNext`     | `+NXT`      | 确认当前消息已处理，并请求将下一条消息投递到 reply subject；仅适用于 Pull 模式 |
 | `AckTerm`     | `+TERM`     | 指示服务器停止对该消息的重投递，但并不表示它被成功处理 |
 
