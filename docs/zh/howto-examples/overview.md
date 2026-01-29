@@ -2,13 +2,13 @@
 
 ## 概述
 
-​这些示例的主要受众是 DevOps、运维人员和架构师。我们将展示如何配置 NATS 的各项功能——从最基础的本地服务器单机配置，到支持叶子节点（Leaf Nodes）和分布式认证的副本超级集群（Super-clusters）。
+这些示例的主要受众是 DevOps、运维人员和架构师。我们将展示如何配置 NATS 的各项功能——从最基础的本地服务器单机配置，到支持叶子节点（Leaf Nodes）和分布式认证的副本超级集群（Super-clusters）。
 
 多些冗余也无妨。这里的不少例子是从别处‘搬运’来的，我们对此直认不讳。 :)
 
 我们通常使用 [NATS 命令行界面](../using-nats/nats-tools/nats_cli/README.md)（NATS CLI），您可在此处[下载](https://github.com/nats-io/natscli/releases)。
 
-​NATS CLI 是一个基于 Golang API 构建的独立工具，其中并没有什么“独家秘籍”。凡是能通过 CLI 完成的操作，也都能通过[客户端 API](#编程示例与客户端-API) 实现（偶尔可能需要监听一些特定的“魔法”主题）。
+NATS CLI 是一个基于 Golang API 构建的独立工具，其中并没有什么“独家秘籍”。凡是能通过 CLI 完成的操作，也都能通过[客户端 API](#编程示例与客户端-API) 实现（偶尔可能需要监听一些特定的“魔法”主题）。
 
 示例大致分为以下几类：
 
@@ -27,7 +27,7 @@
 
 ## 开始之前
 
-​所有的示例都力求提供“端到端”的完整指引，并假设读者几乎不需要预备知识。要开始使用，您需要安装 [nats-server](https://github.com/nats-io/nats-server/releases) 和 [nats-cli](https://github.com/nats-io/natscli/releases)。
+所有的示例都力求提供“端到端”的完整指引，并假设读者几乎不需要预备知识。要开始使用，您需要安装 [nats-server](https://github.com/nats-io/nats-server/releases) 和 [nats-cli](https://github.com/nats-io/natscli/releases)。
 
 ### 服务器
 
