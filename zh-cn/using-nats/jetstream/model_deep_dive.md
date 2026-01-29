@@ -271,13 +271,13 @@ State:
 
 `+NXT` 有几种格式：例如 `+NXT 10` 表示请求 10 条消息；`+NXT {"no_wait": true}` 表示携带与 Pull Request 相同结构的数据。
 
-## “恰好一次”（Exactly Once）语义
+## 恰好一次语义
 
 JetStream 通过结合“消息去重”和“双重确认”，支持“恰好一次”的发布与消费语义。
 
-在发布侧，你可以通过 [消息去重](model\_deep\_dive.md#message-deduplication) 来避免重复写入。
+在发布侧，你可以通过 [消息去重](model\_deep\_dive.md#message-deduplication) 来避免重复摄取消息。
 
-在消费侧，若希望 100% 确认消息确实被正确处理，可以要求服务器确认“已收到你的 ACK”（也称 double-acking）。做法是调用消息的 `AckSync()`（而非 `Ack()`）：它会在 ACK 上设置 reply subject，并等待服务器对“ACK 已接收并处理”的回应。如果服务器返回成功，你就可以确信：因为 ACK 丢失而导致的再次重投递不会发生。
+在消费侧，若希望 100% 确认消息确实被正确处理，可以要求服务器确认“已收到你的 ACK”（也称 double-acking）。做法是调用消息的 `AckSync()`（而非 `Ack()`）：它会在 ACK 上设置 reply subject，并等待服务器对“ACK 已接收并处理”的回应。只要收到服务端的成功响应，你就可以确信：消费者永远不会（由于你的ACK在传递中丢失而）重发该消息给你。
 
 ## Consumer 的起始位置
 
