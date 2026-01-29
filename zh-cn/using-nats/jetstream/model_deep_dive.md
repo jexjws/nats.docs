@@ -265,7 +265,7 @@ State:
 
 到目前为止，示例使用的都是 `AckAck`。你可以根据 `Bytes` 列所示的 body 内容来选择想要的 ACK 模式。注意：这里描述的是 JetStream 的内部协议细节；各客户端库通常提供了更高层的 API 来完成上述 ACK，你无需关心底层 payload。
 
-除 `AckNext` 外，以上 ACK 模式都支持“双重确认”（double acknowledgement）：如果你在 ACK 时设置 reply subject，服务器会再回复一次，确认它已经收到你的 ACK。
+除 `AckNext` 外，以上 ACK 模式都支持“双重确认”（double acknowledgement）：如果你在发送 ACK 时设置了 reply subject，服务器在收到你的确认后会反过来再回复一次，确认它已经收到你的 ACK。
 
 `+NXT` 有几种格式：例如 `+NXT 10` 表示请求 10 条消息；`+NXT {"no_wait": true}` 表示携带与 Pull Request 相同结构的数据。
 
