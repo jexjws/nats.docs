@@ -279,7 +279,7 @@ JetStream 通过结合“消息去重”和“双重确认”，支持“恰好�
 
 ## Consumer 的起始位置
 
-创建 Consumer 时，你可以决定从哪里开始投递。系统通过 `DeliverPolicy` 支持以下起点：
+创建 Consumer 时，你可以决定从哪里开始读取数据。。系统通过 `DeliverPolicy` 支持以下起点：
 
 | Policy              | 说明 |
 | ------------------- | ---- |
