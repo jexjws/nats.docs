@@ -4,7 +4,7 @@
 
 这些示例的主要受众是 Dev-Ops、运维人员和架构师。我们将展示如何配置 NATS 的各项功能，从简单的本地服务器到带有叶节点的复制超级集群以及分布式认证。
 
-我们不介意啰嗦。这里提供的许多示例在其他地方也能找到，我们毫不掩饰地借鉴它们。
+多些冗余也无妨。这里的不少例子是从别处‘搬运’来的，我们对此直认不讳。 :)
 
 我们通常使用 [NATS 命令行界面](../using-nats/nats-tools/nats_cli/README.md)（NATS CLI），您可在此处[下载](https://github.com/nats-io/natscli/releases)。
 
