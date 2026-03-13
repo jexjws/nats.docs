@@ -6,8 +6,6 @@ Auth Callout is an opt-in extension for delegating client authentication and aut
 
 The motivation for this extension is to support applications using an alternate identity and access management (IAM) backend as the source of truth for managing users/applications/machines credentials and permissions. This could be services that implement standard protocols such as LDAP, SAML, and OAuth, an ad-hoc database, or even a file on disk.
 
-<figure><img src="../../../.gitbook/assets/auth-callout-light.png" alt=""><figcaption><p>Auth Callout</p></figcaption></figure>
-
 Both centralized and decentralized authentication models are supported with slightly different considerations and semantics.
 
 There are three phases to leveraging auth callout:
@@ -30,9 +28,9 @@ Refer to the [end-to-end example](https://natsbyexample.com/examples/auth/callou
 
 There are three key data structures:
 
-* [authorization request claims](auth\_callout.md#authorization-request-claims)
-* [authorization response claims](auth\_callout.md#authorization-response-claims)
-* [user claims](auth\_callout.md#user-claims)
+* [authorization request claims](auth_callout.md#authorization-request-claims)
+* [authorization response claims](auth_callout.md#authorization-response-claims)
+* [user claims](auth_callout.md#user-claims)
 
 {% hint style="info" %}
 Language support for these structures currently exists for Go in the [nats-io/jwt](https://pkg.go.dev/github.com/nats-io/jwt/v2) package.
@@ -402,7 +400,7 @@ The claims is a standard JWT structure with a nested object named `nats` contain
 
 The claims is a standard JWT structure with a nested object named `nats` containing the following top-level fields:
 
-* `jwt` - The encoded [user claims](auth\_callout.md#user-claims) JWT which will be used by the NATS server for the duration of the client connection.
+* `jwt` - The encoded [user claims](auth_callout.md#user-claims) JWT which will be used by the NATS server for the duration of the client connection.
 * `error` - An error message sent back to the NATS server if authorization failed. This will be included log output.
 * `issuer_account` - The public Nkey of the issuing account. If set, this indicates the claim was issued by a signing key.
 

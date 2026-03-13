@@ -2,8 +2,6 @@
 
 考虑以下架构
 
-![订单](<../../.gitbook/assets/streams-and-consumers-75p (1).png>)
-
 尽管这是一个不完整的架构，但它展示了几个关键点：
 
 * 多个相关主题被存放在一个流（Stream）中
@@ -18,7 +16,7 @@
 
 ## 示例配置
 
-[更多文档](/running-a-nats-service/configuration/clustering/jetstream_clustering/administration.md)中介绍了 `nats` 工具以及如何使用它来创建、监控和管理流与消费者，但为了完整性和参考，以下是创建 ORDERS 场景的方法。我们将为与订单相关的消息配置 1 年的保留时间：
+[更多文档](../../../running-a-nats-service/configuration/clustering/jetstream_clustering/administration.md)中介绍了 `nats` 工具以及如何使用它来创建、监控和管理流与消费者，但为了完整性和参考，以下是创建 ORDERS 场景的方法。我们将为与订单相关的消息配置 1 年的保留时间：
 
 ```bash
 nats stream add ORDERS --subjects "ORDERS.*" --ack --max-msgs=-1 --max-bytes=-1 --max-age=1y --storage file --retention limits --max-msg-size=-1 --discard=old

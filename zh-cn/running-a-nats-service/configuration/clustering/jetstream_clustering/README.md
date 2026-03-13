@@ -1,4 +1,4 @@
-# JetStream 集群
+# JetStream Clustering
 
 JetStream 中的集群对于高可用和可扩展的系统是必需的。集群背后是 RAFT 算法。使用集群不需要深入理解 RAFT，不过了解一点点便可以解释设置 JetStream 集群背后的一些要求。
 
@@ -23,15 +23,9 @@ RAFT 算法有一些要求：
 
 **元组** - 所有服务器加入元组，JetStream API 由此组管理。选举一个领导者，该领导者拥有 API 并负责服务器放置。
 
-![元组](../../../../.gitbook/assets/meta-group.png)
-
 **流组** - 每个流创建一个对应的 RAFT 组，此组在其成员之间同步状态和数据。选举的领导者处理 ACK 等，如果没有领导者，流将不接受消息。
 
-![流组](../../../../.gitbook/assets/stream-groups.png)
-
 **消费者组** - 每个消费者创建一个对应的 RAFT 组，此组在其成员之间同步消费者状态。该组将位于流组所在的机器上，并处理消费 ACK 等。每个消费者会有自己的组。
-
-![消费者组](../../../../.gitbook/assets/consumer-groups.png)
 
 ### 集群大小
 
@@ -49,7 +43,7 @@ RAFT 算法有一些要求：
 
 ### 服务器密码配置
 
-应配置[系统账户 ($SYS)](../../sys\_accounts/#system-account) 下的用户和密码。以下配置使用 [bcrypted 密码](../../securing\_nats/auth\_intro/username\_password.md)：`a very long s3cr3t! password`。
+应配置[系统账户 ($SYS)](../../sys_accounts/#system-account) 下的用户和密码。以下配置使用 [bcrypted 密码](../../securing_nats/auth_intro/username_password.md)：`a very long s3cr3t! password`。
 
 ### 服务器 1 (host\_a)
 

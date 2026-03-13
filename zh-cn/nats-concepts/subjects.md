@@ -1,24 +1,20 @@
-# 基于主题的消息传递
+# 基于 Subject 的消息传递
 
 NATS 是一种在名为 `Subjects`（主题）的通信通道上发布和监听消息的系统。从根本上讲，NATS 是一种 `interest-based`（基于兴趣）的消息传递系统，其中监听者必须 `subscribe`（订阅）一组特定的 `Subjects`。
 
-在其他中间件系统中，主题可能被称为 `topics`、`channels` 或 `streams`（请注意，在NATS中，“stream”一词用于指代 [JetStream](jetstream/README.md) 消息存储）。
+在其他中间件系统中，主题可能被称为 `topics`、`channels` 或 `streams`（请注意，在NATS中，“stream”一词用于指代 [JetStream](jetstream/) 消息存储）。
 
-**什么是主题？**
-最简单地说，主题只是一个字符串，发布者和订阅者可以使用它来相互识别。更常见的是使用[主题层次结构](#subject-hierarchies)将消息划分为语义命名空间。
+**什么是主题？** 最简单地说，主题只是一个字符串，发布者和订阅者可以使用它来相互识别。更常见的是使用[主题层次结构](subjects.md#subject-hierarchies)将消息划分为语义命名空间。
 
 {% hint style="info" %}
-请查看此处有关主题命名的[约束和约定](#characters-allowed-and-recommended-for-subject-names)。
+请查看此处有关主题命名的[约束和约定](subjects.md#characters-allowed-and-recommended-for-subject-names)。
 {% endhint %}
 
-**位置透明性**
-通过基于主题的寻址，NATS 在一个（大型）路由 NATS 服务器云中提供了位置透明性。
+**位置透明性** 通过基于主题的寻址，NATS 在一个（大型）路由 NATS 服务器云中提供了位置透明性。
 
 * 主题订阅会自动在服务器云中传播。
 * 消息会自动路由到所有感兴趣的订阅者，而无需考虑其位置。
-* 如果没有订阅者订阅某个主题的消息，则该消息会被自动丢弃（请参阅 [JetStream](jetstream/README.md) 功能以了解消息持久化）。
-
-![](../.gitbook/assets/subjects1.svg)
+* 如果没有订阅者订阅某个主题的消息，则该消息会被自动丢弃（请参阅 [JetStream](jetstream/) 功能以了解消息持久化）。
 
 ## 通配符
 
@@ -72,15 +68,15 @@ NATS 可以高效地管理数千万个主题，因此您可以为业务实体使
 
 * 使用第一个或前几个标记（token）建立通用命名空间。
 
-````shell
+```shell
 factory1.tools.group42.unit17
-````
+```
 
 * 使用最后一个或最后几个标记作为标识符。
 
-````shell
+```shell
 service.deploy.server-acme.app123
-````
+```
 
 * 一个主题 _应该_ 用于多个消息。
 * 订阅 _应该_ 稳定（存在以接收多个消息）。
@@ -90,15 +86,15 @@ service.deploy.server-acme.app123
 
 ✅ 实用的：
 
-````shell
+```shell
 orders.online.store123.order171711
-````
+```
 
 ❌ 也许没那么有用：
 
-````shell
+```shell
 orders.online.us.server42.ccpayment.premium.store123.electronics.deliver-dhl.order171711.create
-````
+```
 
 * NATS 消息支持 headers。这些可以用于附加元数据。有一些订阅模式仅提供 headers，从而可以在消息流中高效扫描元数据。
 
@@ -106,13 +102,9 @@ orders.online.us.server42.ccpayment.premium.store123.electronics.deliver-dhl.ord
 
 第一个通配符是 `*`，它可以匹配单个标记。例如，如果一个应用程序想要监听东部时区，它可以订阅 `time.*.east`，这将匹配 `time.us.east` 和 `time.eu.east`。注意，`*` 不能匹配标记内的子字符串 `time.New*.east`。
 
-![](../.gitbook/assets/subjects2.svg)
-
 ### 匹配多个标记
 
 第二个通配符是 `>`，它可以匹配一个或多个标记，并且只能出现在主题的末尾。例如，`time.us.>` 将匹配 `time.us.east` 和 `time.us.east.atlanta`，而 `time.us.*` 只会匹配 `time.us.east`，因为它无法匹配多个标记。
-
-![](../.gitbook/assets/subjects3.svg)
 
 ### 监控和监听
 
@@ -130,15 +122,11 @@ UTF-8（UTF8）字符在主题中得到支持。请自行承担使用多语言�
 
 此处的规则和建议适用于所有系统名称、主题、流、持久化、桶、键（在键值存储中），因为 NATS 将创建包含这些名称的 API 主题。NATS 在大多数情况下会强制执行这些约束，但我们建议不要依赖于此。
 
-*   **允许的字符**：任何 Unicode 字符，除了 `null`、空格、`.`、`*` 和 `>`。
-
-*   **推荐的字符**：（`a` - `z`）、（`A` - `Z`）、（`0` - `9`）、`-` 和 `_`（名称区分大小写，且不能包含空格）。
-
-*   **命名约定**：如果您想分隔单词，请使用大驼峰式命名法，如 `MyServiceOrderCreate`，或者使用 `-` 和 `_`，如 `my-service-order-create`。
-
-*   **特殊字符**：句点 `.`（用于分隔主题中的令牌）以及 `*` 和 `>`（`*` 和 `>` 用作通配符）是保留字符，不能使用。
-
-*   **保留名称**：按照约定，以 `$` 开头的主题名称保留给系统使用（例如，以 `$SYS`、`$JS` 或 `$KV` 等开头的主题名称）。许多系统主题也使用 `_`（下划线）（例如 `_INBOX`、`KV_ABC`、`OBJ_XYZ` 等）。
+* **允许的字符**：任何 Unicode 字符，除了 `null`、空格、`.`、`*` 和 `>`。
+* **推荐的字符**：（`a` - `z`）、（`A` - `Z`）、（`0` - `9`）、`-` 和 `_`（名称区分大小写，且不能包含空格）。
+* **命名约定**：如果您想分隔单词，请使用大驼峰式命名法，如 `MyServiceOrderCreate`，或者使用 `-` 和 `_`，如 `my-service-order-create`。
+* **特殊字符**：句点 `.`（用于分隔主题中的令牌）以及 `*` 和 `>`（`*` 和 `>` 用作通配符）是保留字符，不能使用。
+* **保留名称**：按照约定，以 `$` 开头的主题名称保留给系统使用（例如，以 `$SYS`、`$JS` 或 `$KV` 等开头的主题名称）。许多系统主题也使用 `_`（下划线）（例如 `_INBOX`、`KV_ABC`、`OBJ_XYZ` 等）。
 
 ✅ 良好的名称示例：
 

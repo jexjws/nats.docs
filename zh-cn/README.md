@@ -1,8 +1,8 @@
 # 欢迎
 
-###### 您现在访问的是 NATS 爱好者基于官方文档，使用 AI 翻译 + 人工审核制作的 文档汉化 | [官方 NATS 文档](https://docs.nats.io/) 
+**您现在访问的是 NATS 爱好者基于官方文档，使用 AI 翻译 + 人工审核制作的 文档汉化 |** [**官方 NATS 文档**](https://docs.nats.io/)
 
-###### 欢迎大家共建中文文档：https://github.com/jexjws/nats.docs
+**欢迎大家一同维护中文文档：**[**https://github.com/jexjws/nats.docs**](https://github.com/jexjws/nats.docs)
 
 NATS 是一个简单、安全且高性能的开源数据层，专为云原生应用、物联网消息传递和微服务架构而设计。
 

@@ -2,8 +2,6 @@
 
 复制功能允许您在流之间进行数据移动，既可以采用一对一镜像模式，也可以将多个设置了 Sources 的流多路复用到一个新的流中。在未来的版本中，这还将支持在不同账户之间复制数据，非常适合将叶子节点中的数据发送到中央存储。
 
-![](../../../.gitbook/assets/replication.png)
-
 图中我们有两个主要的流：_ORDERS_ 和 _RETURNS_，这些流分布在三个节点上，并且具有较短的保留期，使用内存存储。
 
 我们创建了一个名为 _ARCHIVE_ 的流，它设置了两个 Sources。_ARCHIVE_ 流会从这些设置了 Sources 的流中拉取数据。这个流具有较长的保留期，使用文件存储，并在三个节点上进行复制。此外，还可以通过直接发送消息到该流来添加额外的消息。
@@ -29,7 +27,8 @@
 ```shell
 nats s report
 ```
-```text
+
+```
 Obtaining Stream stats
 
 +---------+---------+-----------+----------+-------+------+---------+----------------------+
@@ -45,7 +44,8 @@ Obtaining Stream stats
 ```shell
 nats s add ARCHIVE --source ORDERS --source RETURNS
 ```
-```text
+
+```
 ? Storage backend file
 ? Retention Policy Limits
 ? Discard Policy Old
@@ -104,7 +104,8 @@ State:
 ```shell
 nats s add REPORT --mirror ARCHIVE
 ```
-```text
+
+```
 ? Storage backend file
 ? Retention Policy Limits
 ? Discard Policy Old
@@ -154,9 +155,11 @@ State:
 
 ```shell
 nats stream info ARCHIVE
-``` 
+```
+
 输出摘录
-```text
+
+```
 ...
 Source Information:
 
@@ -186,7 +189,8 @@ Mirror Information:
 ```shell
 nats s report
 ```
-```text
+
+```
 +--------------------------------------------------------------------------------------------------------+
 |                                            Stream Report                                               |
 +---------+---------+-------------+-----------+----------+-------+------+---------+----------------------+
@@ -221,7 +225,8 @@ nats req RETURNS.new "RETURN {{Count}}" --count 100
 ```shell
 nats s report --dot replication.dot
 ```
-```text
+
+```
 Obtaining Stream stats
 
 +---------+---------+-----------+----------+---------+------+---------+----------------------+
@@ -244,6 +249,4 @@ Obtaining Stream stats
 +---------+--------+---------------+--------+-----+-------+
 ```
 
-在这里，我们还传递了 `--dot replication.dot` 参数，该参数会将 设置情况 以 GraphViz 图表格式输出到 `replication.dot` 文件中。
-![](../../../.gitbook/assets/replication-setup.png)
-
+在这里，我们还传递了 `--dot replication.dot` 参数，该参数会将 设置情况 以 GraphViz 图表格式输出到 `replication.dot` 文件中。&#x20;
